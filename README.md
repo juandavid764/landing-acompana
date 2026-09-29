@@ -16,7 +16,7 @@ La página muestra la solución y permite hablar por voz, desde el navegador, co
 1. El usuario escribe su WhatsApp (celular colombiano, 10 dígitos que empiezan por 3) y marca la autorización.
 2. (Opcional) El número se envía por `POST` a `VITE_LEADS_WEBHOOK_URL`.
 3. El navegador pide permiso de micrófono y se inicia la sesión con el agente (`startSession({ agentId, connectionType: 'webrtc' })`).
-4. Al conectar, se envía a Marcela un `contextualUpdate` con el número de WhatsApp para que no lo vuelva a pedir.
+4. El número viaja como variable dinámica `whatsapp`, en formato `573189128065` (código de país + 10 dígitos, sin `+` ni espacios), (`{{whatsapp}}` en el prompt de Marcela) y regresa en el post-call webhook, en `data.conversation_initiation_client_data.dynamic_variables.whatsapp`.
 5. Al colgar, se muestra la confirmación: el resumen llega por WhatsApp y una persona del equipo continúa el caso.
 
 Todo está en [`src/components/CallCard.jsx`](src/components/CallCard.jsx).

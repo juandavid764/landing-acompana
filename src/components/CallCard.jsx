@@ -125,7 +125,8 @@ export default function CallCard({ id, compact = false }) {
       return;
     }
     setError('');
-    whatsappRef.current = `+57${phone}`;
+    // Formato internacional sin "+" ni espacios (ej. 573189128065), listo para la API de WhatsApp.
+    whatsappRef.current = `57${phone}`;
 
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -141,7 +142,13 @@ export default function CallCard({ id, compact = false }) {
     saveLead(whatsappRef.current);
 
     try {
-      await conversation.startSession({ agentId: AGENT_ID, connectionType: 'webrtc' });
+      // `whatsapp` viaja como variable dinámica: el agente la usa como {{whatsapp}} y vuelve en el
+      // post-call webhook en data.conversation_initiation_client_data.dynamic_variables.whatsapp
+      await conversation.startSession({
+        agentId: AGENT_ID,
+        connectionType: 'webrtc',
+        dynamicVariables: { whatsapp: whatsappRef.current },
+      });
     } catch (err) {
       console.error(err);
       setError('No pudimos conectar la llamada. Intente de nuevo en un momento.');

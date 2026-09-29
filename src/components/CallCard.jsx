@@ -212,7 +212,7 @@ export default function CallCard({ id, compact = false }) {
           <div className="live__top">
             <span className="live__who">
               <span className="live__avatar"><LoopMark color="#FFFFFF" size={22} /></span>
-              Marcela · asistente
+              Marcela<span className="live__role"> · asistente</span>
             </span>
             {!connecting && (
               <span className="live__timer" aria-label={`Duración ${formatTime(seconds)}`}>

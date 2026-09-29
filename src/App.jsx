@@ -5,8 +5,8 @@ import { LoopMark, PhoneIcon, CheckIcon, DashIcon, MenuIcon } from './components
 const PHONE_LINE = import.meta.env.VITE_PHONE_LINE || '[NÚMERO DE LÍNEA]';
 
 const STEPS = [
-  { n: 1, title: 'Llama', text: 'Marca un número o habla desde esta página. Ramon, nuestro asistente de IA, contesta a cualquier hora. Sin apps ni formularios.', who: 'ai' },
-  { n: 2, title: 'Cuenta qué necesita', text: 'Ramon le pregunta el trámite, su nombre, su documento y su EPS. Su solicitud queda registrada.', who: 'ai' },
+  { n: 1, title: 'Llama', text: 'Marca un número o habla desde esta página. Marcela, nuestra asistente de IA, contesta a cualquier hora. Sin apps ni formularios.', who: 'ai' },
+  { n: 2, title: 'Cuenta qué necesita', text: 'Marcela le pregunta el trámite, su nombre, su documento y su EPS. Su solicitud queda registrada.', who: 'ai' },
   { n: 3, title: 'Recibe el resumen', text: 'Al colgar, le llega por WhatsApp lo que pidió, en sus propias palabras.', who: 'ai' },
   { n: 4, title: 'Una persona revisa', text: 'Un supervisor valida su solicitud y la asigna a un gestor, o la atiende él mismo.', who: 'human' },
   { n: 5, title: 'Lo llaman y se resuelve', text: 'El gestor le explica si es virtual o presencial, el costo y la fecha. Hace el trámite y le confirma el resultado.', who: 'human' },
@@ -98,7 +98,7 @@ export default function App() {
             <span className="pill">Trámites de salud para personas mayores</span>
             <h1>Sus trámites de salud, con una llamada.</h1>
             <p className="lead">
-              Ramon, nuestro asistente, toma su solicitud a cualquier hora. Después, una persona de nuestro equipo lo llama y la resuelve con usted.
+              Marcela, nuestra asistente, toma su solicitud a cualquier hora. Después, una persona de nuestro equipo lo llama y la resuelve con usted.
             </p>
             <p className="tagline">Tecnología que facilita, personas que acompañan.</p>
           </div>
@@ -124,7 +124,7 @@ export default function App() {
                 <h2 className="h2">Cinco pasos, una sola llamada para empezar</h2>
               </div>
               <ul className="legend">
-                <li><span className="dot dot--sky" />Pasos 1–3: Ramon, asistente de IA, 24/7</li>
+                <li><span className="dot dot--sky" />Pasos 1–3: Marcela, asistente de IA, 24/7</li>
                 <li><span className="dot dot--lime" />Pasos 4–5: personas de nuestro equipo</li>
               </ul>
             </div>
@@ -208,7 +208,7 @@ export default function App() {
             </svg>
             <div className="stack cta__copy">
               <h2 className="h2">¿Tiene un trámite pendiente? Empecemos hoy.</h2>
-              <p className="body-lg">Deje su WhatsApp y hable con Ramon en este mismo momento.</p>
+              <p className="body-lg">Deje su WhatsApp y hable con Marcela en este mismo momento.</p>
             </div>
             <button type="button" className="btn btn--navy btn--lg" onClick={focusForm}>Solicitar mi llamada</button>
           </div>

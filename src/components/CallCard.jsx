@@ -42,7 +42,7 @@ export default function CallCard({ id, compact = false }) {
   const [lastAgentLine, setLastAgentLine] = useState(
     DEMO ? cleanTranscript('[amablemente] De nada, David, que te mejores pronto de tu rodilla. Que tengas un excelente día.') : ''
   );
-  const [lastUserLine, setLastUserLine] = useState(DEMO ? 'Muchas gracias, Ramon.' : '');
+  const [lastUserLine, setLastUserLine] = useState(DEMO ? 'Muchas gracias, Marcela.' : '');
   const [lastSource, setLastSource] = useState('ai');
   const [seconds, setSeconds] = useState(DEMO ? 87 : 0);
   const [muted, setMuted] = useState(false);
@@ -55,7 +55,7 @@ export default function CallCard({ id, compact = false }) {
     micMuted: muted,
     onConnect: () => {
       wasConnected.current = true;
-      // Le damos contexto a Ramon sin interrumpir su saludo.
+      // Le damos contexto a Marcela sin interrumpir su saludo.
       conversation.sendContextualUpdate?.(
         `El usuario ya registró su número de WhatsApp: ${whatsappRef.current}. No se lo vuelvas a pedir; úsalo para enviarle el resumen de la solicitud.`
       );
@@ -87,7 +87,7 @@ export default function CallCard({ id, compact = false }) {
     return () => clearInterval(t);
   }, [status]);
 
-  // Las barras y el anillo siguen el volumen real: de Ramon cuando habla, del usuario cuando escucha.
+  // Las barras y el anillo siguen el volumen real: de Marcela cuando habla, del usuario cuando escucha.
   useEffect(() => {
     if (status !== 'connected') return undefined;
     let frame;
@@ -194,7 +194,7 @@ export default function CallCard({ id, compact = false }) {
             <span>Acepto que usen mis datos para gestionar mi trámite y escribirme por WhatsApp.</span>
           </label>
           <button type="submit" className="btn btn--lime btn--block">
-            <PhoneIcon /> Hablar con Ramon
+            <PhoneIcon /> Hablar con Marcela
           </button>
           <p className="muted center small">¿Prefiere marcar? Llame al <strong>{PHONE_LINE}</strong></p>
         </form>
@@ -205,7 +205,7 @@ export default function CallCard({ id, compact = false }) {
           <div className="live__top">
             <span className="live__who">
               <span className="live__avatar"><LoopMark color="#FFFFFF" size={22} /></span>
-              Ramon · asistente
+              Marcela · asistente
             </span>
             {!connecting && (
               <span className="live__timer" aria-label={`Duración ${formatTime(seconds)}`}>
@@ -225,11 +225,11 @@ export default function CallCard({ id, compact = false }) {
             aria-live="polite"
           >
             {connecting ? (
-              'Conectando con Ramon…'
+              'Conectando con Marcela…'
             ) : muted ? (
               <><MicIcon size={22} off /> Su micrófono está apagado</>
             ) : isSpeaking ? (
-              'Ramon está hablando'
+              'Marcela está hablando'
             ) : (
               <><MicIcon size={22} /> Su turno: puede hablar</>
             )}
@@ -251,7 +251,7 @@ export default function CallCard({ id, compact = false }) {
               )}
               {lastAgentLine && (
                 <div className="msg msg--agent">
-                  <span className="msg__who">Ramon</span>
+                  <span className="msg__who">Marcela</span>
                   <p>{lastAgentLine}</p>
                 </div>
               )}

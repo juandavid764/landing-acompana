@@ -4,7 +4,7 @@ Landing page de la propuesta **"Agente de IA telefónico + gestor humano para tr
 
 > Tecnología que facilita, personas que acompañan.
 
-La página muestra la solución y permite hablar por voz, desde el navegador, con **Ramon**, el agente de ElevenLabs Conversational AI. Antes de iniciar la llamada, el usuario debe escribir su número de WhatsApp y aceptar el tratamiento de datos.
+La página muestra la solución y permite hablar por voz, desde el navegador, con **Marcela**, la agente de ElevenLabs Conversational AI. Antes de iniciar la llamada, el usuario debe escribir su número de WhatsApp y aceptar el tratamiento de datos.
 
 ## Stack
 
@@ -16,7 +16,7 @@ La página muestra la solución y permite hablar por voz, desde el navegador, co
 1. El usuario escribe su WhatsApp (celular colombiano, 10 dígitos que empiezan por 3) y marca la autorización.
 2. (Opcional) El número se envía por `POST` a `VITE_LEADS_WEBHOOK_URL`.
 3. El navegador pide permiso de micrófono y se inicia la sesión con el agente (`startSession({ agentId, connectionType: 'webrtc' })`).
-4. Al conectar, se envía a Ramon un `contextualUpdate` con el número de WhatsApp para que no lo vuelva a pedir.
+4. Al conectar, se envía a Marcela un `contextualUpdate` con el número de WhatsApp para que no lo vuelva a pedir.
 5. Al colgar, se muestra la confirmación: el resumen llega por WhatsApp y una persona del equipo continúa el caso.
 
 Todo está en [`src/components/CallCard.jsx`](src/components/CallCard.jsx).
@@ -35,7 +35,7 @@ Abre http://localhost:5173. El micrófono solo funciona en `localhost` o en HTTP
 
 | Variable | Uso |
 | --- | --- |
-| `VITE_ELEVENLABS_AGENT_ID` | ID del agente (por defecto, Ramon: `agent_4501m3pt08mcfe0b9ht61n44xv67`) |
+| `VITE_ELEVENLABS_AGENT_ID` | ID del agente (por defecto, Marcela: `agent_4501m3pt08mcfe0b9ht61n44xv67`) |
 | `VITE_LEADS_WEBHOOK_URL` | Opcional. Recibe `{ whatsapp, consent, createdAt }` antes de cada llamada |
 | `VITE_PHONE_LINE` | Número de la línea telefónica que aparece en la página |
 

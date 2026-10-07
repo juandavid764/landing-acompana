@@ -11,7 +11,7 @@ const BAR_SHAPE = Array.from({ length: BAR_COUNT }, (_, i) => 0.45 + 0.55 * Math
 
 const AGENT_ID = import.meta.env.VITE_ELEVENLABS_AGENT_ID || 'agent_4501m3pt08mcfe0b9ht61n44xv67';
 const LEADS_WEBHOOK_URL = import.meta.env.VITE_LEADS_WEBHOOK_URL;
-const PHONE_LINE = import.meta.env.VITE_PHONE_LINE || '[NÚMERO DE LÍNEA]';
+import { PHONE_LINE, PHONE_TEL } from '../config.js';
 
 const formatPhone = (digits) =>
   digits.length > 6 ? `${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}` : digits.length > 3 ? `${digits.slice(0, 3)} ${digits.slice(3)}` : digits;
@@ -39,6 +39,7 @@ export default function CallCard({ id, compact = false }) {
   const [phone, setPhone] = useState(DEMO ? '3001234567' : '');
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState('');
+  const [phoneInvalid, setPhoneInvalid] = useState(false);
   const [lastAgentLine, setLastAgentLine] = useState(
     DEMO ? cleanTranscript('[amablemente] De nada, David, que te mejores pronto de tu rodilla. Que tengas un excelente día.') : ''
   );
@@ -110,18 +111,24 @@ export default function CallCard({ id, compact = false }) {
   }, [status, isSpeaking, muted, conversation]);
 
   const onPhoneChange = (e) => {
-    setPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
+    let digits = e.target.value.replace(/\D/g, '');
+    // Si pegan o autocompletan "+57 300…", quitamos el indicativo del país.
+    if (digits.length > 10 && digits.startsWith('57')) digits = digits.slice(2);
+    setPhone(digits.slice(0, 10));
     setError('');
+    setPhoneInvalid(false);
   };
 
   const startCall = async (e) => {
     e.preventDefault();
-    if (!/^3\d{9}$/.test(phone)) {
-      setError('Escriba un celular de 10 dígitos que empiece por 3.');
-      return;
-    }
-    if (!consent) {
-      setError('Para continuar, marque la casilla de autorización.');
+    // Mostramos todos los problemas a la vez para evitar varios intentos fallidos.
+    const problems = [];
+    const badPhone = !/^3\d{9}$/.test(phone);
+    setPhoneInvalid(badPhone);
+    if (badPhone) problems.push('Escriba un celular de 10 dígitos que empiece por 3.');
+    if (!consent) problems.push('Marque la casilla de autorización.');
+    if (problems.length) {
+      setError(problems.join(' '));
       return;
     }
     setError('');
@@ -168,6 +175,38 @@ export default function CallCard({ id, compact = false }) {
     setError('');
   };
 
+  // Expone el paso de la llamada para que la barra fija móvil (MobileCta) se oculte durante y después de la llamada.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.callStep = step;
+    return () => { delete root.dataset.callStep; };
+  }, [step]);
+
+  // Mantiene la pantalla encendida durante la llamada: si el teléfono se bloquea, la llamada puede cortarse.
+  useEffect(() => {
+    if (step !== 'call' || !navigator.wakeLock) return undefined;
+    let lock;
+    let cancelled = false;
+    const acquire = () =>
+      navigator.wakeLock.request('screen').then((l) => {
+        if (cancelled) l.release();
+        else lock = l;
+      }).catch(() => {});
+    const onVisible = () => document.visibilityState === 'visible' && acquire();
+    acquire();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisible);
+      lock?.release().catch(() => {});
+    };
+  }, [step]);
+
+  // Al empezar la llamada, la tarjeta queda arriba para que los botones estén a la vista.
+  useEffect(() => {
+    if (step === 'call' && !DEMO) document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [step, id]);
+
   const connecting = !DEMO && status !== 'connected';
 
   return (
@@ -179,7 +218,7 @@ export default function CallCard({ id, compact = false }) {
             <p className="muted">Primero escriba su WhatsApp. Ahí le enviaremos el resumen de lo que pidió.</p>
           </div>
           <label htmlFor={`${id}-wa`} className="label">Su número de WhatsApp</label>
-          <div className={`phone-field${error ? ' phone-field--error' : ''}`}>
+          <div className={`phone-field${phoneInvalid ? ' phone-field--error' : ''}`}>
             <span className="phone-field__prefix" aria-hidden="true">+57</span>
             <input
               id={`${id}-wa`}
@@ -189,7 +228,7 @@ export default function CallCard({ id, compact = false }) {
               placeholder="300 123 4567"
               value={formatPhone(phone)}
               onChange={onPhoneChange}
-              aria-invalid={!!error}
+              aria-invalid={phoneInvalid}
               aria-describedby={error ? `${id}-err` : undefined}
             />
           </div>
@@ -203,7 +242,14 @@ export default function CallCard({ id, compact = false }) {
           <button type="submit" className="btn btn--lime btn--block">
             <PhoneIcon /> Hablar con Marcela
           </button>
-          <p className="muted center small">¿Prefiere marcar? Llame al <strong>{PHONE_LINE}</strong></p>
+          <p className="muted center small">
+            ¿Prefiere marcar?{' '}
+            {PHONE_TEL ? (
+              <a className="tel-link" href={`tel:${PHONE_TEL}`}>Llame al {PHONE_LINE}</a>
+            ) : (
+              <>Llame al <strong>{PHONE_LINE}</strong></>
+            )}
+          </p>
         </form>
       )}
 

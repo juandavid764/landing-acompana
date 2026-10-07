@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CallCard from './components/CallCard.jsx';
-import { LoopMark, PhoneIcon, CheckIcon, DashIcon, MenuIcon } from './components/Icons.jsx';
+import MobileCta from './components/MobileCta.jsx';
+import { LoopMark, PhoneIcon, CheckIcon, DashIcon, MenuIcon, CloseIcon } from './components/Icons.jsx';
 
-const PHONE_LINE = import.meta.env.VITE_PHONE_LINE || '[NÚMERO DE LÍNEA]';
+import { PHONE_LINE, PHONE_TEL } from './config.js';
 
 const STEPS = [
   { n: 1, title: 'Llama', text: 'Marca un número o habla desde esta página. Marcela, nuestra asistente de IA, contesta a cualquier hora. Sin apps ni formularios.', who: 'ai' },
@@ -56,12 +57,44 @@ const NAV = [
 
 function focusForm() {
   const input = document.querySelector('#solicitar input[type="tel"]');
-  document.getElementById('solicitar')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  setTimeout(() => input?.focus({ preventScroll: true }), 500);
+  // El foco va dentro del mismo toque: iOS solo abre el teclado si focus() ocurre en el gesto del usuario.
+  input?.focus({ preventScroll: true });
+  document.getElementById('solicitar')?.scrollIntoView({ behavior: 'smooth', block: input ? 'center' : 'start' });
 }
 
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef(null);
+  const toggleRef = useRef(null);
+
+  // El menú móvil se cierra con Escape (devolviendo el foco al botón) o tocando fuera de él.
+  // El toque de afuera solo cierra el menú: no activa lo que había debajo (p. ej. la casilla del formulario).
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return;
+      setMenuOpen(false);
+      toggleRef.current?.focus();
+    };
+    const onOutsideClick = (e) => {
+      // e.detail === 0: clic generado por teclado (p. ej. Enter en el formulario); no lo bloqueamos.
+      if (navRef.current?.contains(e.target) || e.detail === 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setMenuOpen(false);
+    };
+    // Desplazarse por la página también cierra el menú (un gesto de scroll no genera clic).
+    const startY = window.scrollY;
+    const onScroll = () => Math.abs(window.scrollY - startY) > 40 && setMenuOpen(false);
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('click', onOutsideClick, true);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('click', onOutsideClick, true);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [menuOpen]);
 
   return (
     <>
@@ -72,25 +105,28 @@ export default function App() {
           <path d="M -80 900 C 260 860 620 780 820 560 C 960 400 1040 200 960 150 C 880 100 820 260 900 430 C 990 620 1250 660 1350 470 C 1410 350 1390 250 1320 190" />
         </svg>
 
-        <nav className="nav container" aria-label="Principal">
+        <nav className="nav container" aria-label="Principal" ref={navRef}>
           <a href="#inicio" className="brand">
             <LoopMark /> <span>acompaña</span>
           </a>
-          <div className={`nav__links${menuOpen ? ' is-open' : ''}`}>
+          {/* El botón va antes de los enlaces en el DOM: al abrir el menú, Tab / VoiceOver pasan directo a ellos. */}
+          <button
+            ref={toggleRef}
+            type="button"
+            className="nav__toggle"
+            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+            aria-expanded={menuOpen}
+            aria-controls="menu-principal"
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            {menuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
+          <div id="menu-principal" className={`nav__links${menuOpen ? ' is-open' : ''}`}>
             {NAV.map(([href, label]) => (
               <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
             ))}
           </div>
           <button type="button" className="btn btn--white nav__cta" onClick={focusForm}>Solicitar llamada</button>
-          <button
-            type="button"
-            className="nav__toggle"
-            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <MenuIcon />
-          </button>
         </nav>
 
         <div className="hero__body container">
@@ -223,10 +259,12 @@ export default function App() {
           </p>
         </div>
         <div className="stack stack--tight footer__links">
-          <span>Línea: {PHONE_LINE}</span>
+          {PHONE_TEL ? <a href={`tel:${PHONE_TEL}`}>Línea: {PHONE_LINE}</a> : <span>Línea: {PHONE_LINE}</span>}
           <a href="#privacidad">Política de tratamiento de datos</a>
         </div>
       </footer>
+
+      <MobileCta onClick={focusForm} hidden={menuOpen} />
     </>
   );
 }
